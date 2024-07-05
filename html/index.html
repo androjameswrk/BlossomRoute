@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Camera</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: "Poppins";
+      }
+
+      #video {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+      }
+
+      #captureBtn {
+        display: block;
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #ffffff;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        padding: 20px; /* Increase this value to make the button larger */
+        cursor: pointer;
+        z-index: 1;
+      }
+
+      #captureBtn:hover {
+        background-color: #c1aeff;
+      }
+
+      #imagePreview {
+        max-width: 100%;
+        height: auto;
+        margin-top: 10px;
+      }
+
+      #saveBtn,
+      #cancelBtn {
+        display: none;
+        background-color: #c1aeff; /* Purple */
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        border: #c1aeff;
+      }
+
+      #saveBtn:hover,
+      #cancelBtn:hover {
+        background-color: #d896ff; /* Darker green on hover */
+      }
+      .swal2-confirm-hover:hover {
+        background-color: #c1aeff !important;
+        border-color: #c1aeff !important;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  </head>
+  <body>
+    <video id="video" autoplay></video>
+    <button
+      id="captureBtn"
+      onclick="captureImage()"
+      style="display: none"
+    ></button>
+    <img id="imagePreview" style="display: none" />
+    <button id="saveBtn" onclick="saveImage()" style="display: none">
+      Save Image
+    </button>
+    <button id="cancelBtn" onclick="cancelCapture()" style="display: none">
+      Upload New
+    </button>
+    <canvas id="canvas" style="display: none"></canvas>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Extract shipmentDetailsId from the URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const shipmentDetailsId = urlParams.get("shipmentDetailsId");
+
+        // Open camera function with shipmentDetailsId
+        openCamera(shipmentDetailsId);
+      });
+
+      function openCamera(shipmentDetailsId) {
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then(function (stream) {
+            var video = document.getElementById("video");
+            video.srcObject = stream;
+            video.play();
+
+            // Pass shipmentDetailsId to saveImage function
+            document.getElementById("saveBtn").onclick = function () {
+              saveImage(shipmentDetailsId);
+            };
+
+            document.getElementById("captureBtn").style.display = "block";
+          })
+          .catch(function (err) {
+            console.error("Error accessing the camera: " + err);
+          });
+      }
+
+      function captureImage() {
+        var video = document.getElementById("video");
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        imageDataUrl = canvas.toDataURL("image/png");
+
+        // Hide video and the "Capture Image" button
+        document.getElementById("video").style.display = "none";
+        document.getElementById("captureBtn").style.display = "none";
+
+        // Show image preview and display Save and Cancel buttons
+        document.getElementById("imagePreview").src = imageDataUrl;
+        document.getElementById("imagePreview").style.display = "block";
+        document.getElementById("saveBtn").style.display = "block";
+        document.getElementById("cancelBtn").style.display = "block";
+      }
+
+      function saveImage(shipmentDetailsId) {
+        // Send the captured image data and shipmentDetailsId to the server (PHP)
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "../save_image.php", true);
+
+        xhr.setRequestHeader(
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        );
+
+        // Pass shipmentDetailsId as a parameter
+        xhr.send(
+          "imageData=" +
+            encodeURIComponent(imageDataUrl) +
+            "&shipmentDetailsId=" +
+            shipmentDetailsId
+        );
+
+        // Display success alert
+        Swal.fire({
+          title: "Image Saved!",
+          text: "Image has been successfully saved.",
+          icon: "success",
+          iconColor: "#C1AEFF",
+          confirmButtonColor: "#C1AEFF", // Set the button color here
+          confirmButtonText: "<span style='color: white'>OK</span>",
+          confirmButtonBorder: "1px solid #C1AEFF", // Set the border color here
+          showCloseButton: false,
+          showCancelButton: false,
+          showConfirmButton: true,
+          focusConfirm: false,
+          allowEscapeKey: false,
+          allowOutsideClick: false,
+          customClass: {
+            confirmButton: "swal2-confirm-hover",
+          },
+        }).then(function () {
+          // Redirect to vehicle_shipment.php
+          window.location.href = "../vehicle_shipment.php";
+        });
+
+        // Reset the UI to initial state
+        resetUI();
+      }
+
+      function cancelCapture() {
+        // Show video and "Capture Image" button
+        document.getElementById("video").style.display = "block";
+        document.getElementById("captureBtn").style.display = "block";
+
+        // Hide image preview and "Save" and "Cancel" buttons
+        document.getElementById("imagePreview").src = "";
+        document.getElementById("imagePreview").style.display = "none";
+        document.getElementById("saveBtn").style.display = "none";
+        document.getElementById("cancelBtn").style.display = "none";
+      }
+
+      function resetUI() {
+        document.getElementById("video").srcObject = null;
+        document.getElementById("video").style.display = "block";
+        document.getElementById("captureBtn").style.display = "block";
+        document.getElementById("imagePreview").src = "";
+        document.getElementById("imagePreview").style.display = "none";
+        document.getElementById("saveBtn").style.display = "none";
+        document.getElementById("cancelBtn").style.display = "none";
+      }
+    </script>
+  </body>
+</html>

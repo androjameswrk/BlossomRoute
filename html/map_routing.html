@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Blossom Route Map</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.css"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      #map {
+        width: 100%;
+        height: 70vh;
+      }
+
+      input[type="text"],
+      button {
+        margin: 5px;
+        width: 100%;
+        max-width: 300px;
+      }
+
+      @media only screen and (min-width: 768px) {
+        /* Adjust styles for larger screens */
+        #map {
+          height: 60vh;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+    <input type="text" id="locationInput" placeholder="Enter location" />
+    <button onclick="geocodeAndPin()">Pin Location</button>
+    <button onclick="routeToPinnedLocation()">Route to Pinned Location</button>
+
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@1.13.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+      var map = L.map("map").setView([7.0736, 125.611], 11);
+      mapLink = "<a href='http://openstreetmap.org'>OpenStreetMap</a>";
+      L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
+        attribution: "Leaflet &copy; " + mapLink + ", contribution",
+        maxZoom: 18,
+      }).addTo(map);
+
+      var taxiIcon = L.icon({
+        iconUrl: "img/taxi.png",
+        iconSize: [70, 70],
+      });
+
+      var marker = L.marker([7.0736, 125.611], { icon: taxiIcon }).addTo(map);
+
+      L.Control.geocoder().addTo(map);
+
+      var routingControl;
+
+      function geocodeAndPin() {
+        var locationInput = document.getElementById("locationInput").value;
+
+        if (locationInput) {
+          var geocoder = L.Control.Geocoder.nominatim();
+          geocoder.geocode(locationInput, function (results) {
+            if (results.length > 0) {
+              var coordinates = results[0].center;
+              marker.setLatLng([coordinates.lat, coordinates.lng]);
+              map.setView([coordinates.lat, coordinates.lng], 11);
+            } else {
+              alert("Location not found");
+            }
+          });
+        } else {
+          alert("Please enter a location");
+        }
+      }
+
+      function routeToPinnedLocation() {
+        var pinnedLocation = marker.getLatLng();
+
+        routingControl = L.Routing.control({
+          waypoints: [
+            L.latLng(7.0736, 125.611),
+            L.latLng(pinnedLocation.lat, pinnedLocation.lng),
+          ],
+        })
+          .on("routesfound", function (e) {
+            var routes = e.routes;
+            console.log(routes);
+
+            e.routes[0].coordinates.forEach(function (coord, index) {
+              setTimeout(function () {
+                marker.setLatLng([coord.lat, coord.lng]);
+              }, 100 * index);
+            });
+          })
+          .addTo(map);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body{
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins";
+    background-color: #E1D8FF;
+    height: 100vh;
+    overflow: hidden;
+}
+.center{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background-color: #E1D8FF !important;
+    border-radius: 10px;
+}
+.center h1{
+    text-align: center;
+    padding: 0 0 20px 0;
+    border-bottom: 1px solid silver;
+    font-weight: 900;
+}
+.center form{
+    padding: 0 50px;
+    height: 430px;
+    box-sizing: border-box;
+}
+form .txt-field{
+    position: relative;
+    border-bottom: 2px solid #E1D8FF;
+    margin: 40px 0;
+}
+.txt-field input{
+    width: 100%;
+    padding: 0 10px;
+    height: 40px;
+    font-size: 16px;
+    border: none;
+    background: none;
+    outline: none;
+}
+.txt-field label{
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    color: #623672;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+    transition: .5s;
+}
+.txt-field span::before{
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #623672;
+    transition: .5s;
+}
+.txt-field input:focus ~ label,
+.txt-field input:valid ~ label{
+    top: -5px;
+    color: #666666;
+}
+
+.txt-field input:focus ~ span::before,
+.txt-field input:valid ~ span:before{
+    width: 100%;
+}
+.pass{
+    margin: -5px 0 60px 5px;
+    color: #623672;
+    cursor: pointer;
+}
+.color{
+    color: #623672;
+}
+.pass:hover{
+    text-decoration: underline;
+}
+input[type="submit"]{
+    width: 100%;
+    height: 50px;
+    border: 1px solid;
+    background: #C1AEFF;
+    border-color: #C1AEFF;
+    border-radius: 25px;
+    font-size: 18px;
+    color: #623672;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+input[type="submit"]:hover{
+    border-color: #C1AEFF;
+    transition: .5s;
+}
+.signup_link{
+    margin: 10px 0;
+    text-align: center;
+    font-size: 16px;
+    color: #666666;
+}
+.signup_link a{
+    color: #623672;
+    text-decoration: none;
+}
+.signup_link a:hover{
+    text-decoration: underline;
+}
+.centered-div {
+    width: 40%;
+    margin-top: 20px !important;
+    margin: 0 auto; 
+}
+.container {
+    background-image: url("../img/purple.jpg");
+    background-size: cover;
+    background-position: center;
+}
+.containercenter {
+    background-color: #E1D8FF !important;
+    background-size: cover;
+    background-position: center;
+}
